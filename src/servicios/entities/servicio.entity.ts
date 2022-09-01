@@ -1,5 +1,5 @@
 import { ServicioPrestado } from 'src/servicios-prestados/entities/servicio-prestado.entity';
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Categoria } from '../../categorias/entities/categoria.entity';
 
 @Entity({ name: 'servicios' })
@@ -24,10 +24,10 @@ export class Servicio {
     )
     categoria: Categoria
 
-    @ManyToMany(
+    @OneToMany(
         () => ServicioPrestado,
-        (servicioPrestado) => servicioPrestado.servicios
+        (servicioPrestado) => servicioPrestado.servicio
     )
-    serviciosPrestados: ServicioPrestado[];
+    serviciosPrestados?: ServicioPrestado[];
 
 }

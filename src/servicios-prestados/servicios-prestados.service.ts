@@ -3,11 +3,11 @@ import { CreateServicioPrestadoDto } from './dto/create-servicio-prestado.dto';
 import { ServicioPrestado } from './entities/servicio-prestado.entity';
 import { Servicio } from '../servicios/entities/servicio.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
+import { GetServiciosPrestadosFiltrosDto } from './dto/get-servicios-prestados-filtros.dto';
 
 @Injectable()
 export class ServiciosPrestadosService {
-
 
   constructor(
 
@@ -19,39 +19,55 @@ export class ServiciosPrestadosService {
 
   ) { }
 
-
   async create(createServicioPrestadoDto: CreateServicioPrestadoDto) {
-    console.log(createServicioPrestadoDto);
 
-    const { servicios: idsServicios = [], ...detallesServicioPrestado } = createServicioPrestadoDto;
-
-    const servicios = await this.servicioRepository.findBy({ id: In(idsServicios) });
+    const { servicio: idServicio, ...detallesServicioPrestado } = createServicioPrestadoDto;
+    const servicio = await this.servicioRepository.findOneBy({ id: idServicio });
 
     const servicioPrestado = this.servicioPrestadoRepository.create({
       ...detallesServicioPrestado,
-      servicios
+      servicio
     });
 
     await this.servicioPrestadoRepository.save(servicioPrestado);
-
-    return { ...servicioPrestado, servicios };
-
+    return { ...servicioPrestado, servicio };
   }
 
-  async findAll() {
+  // Pendiente validar con más detalle el funcionamiento de las fechas
+  async findAll(getServiciosPrestadosFiltrosDto: GetServiciosPrestadosFiltrosDto) {
 
-    let findArgs = { 
-      where:{
-        fechaActual: Between(new Date("2022-08-30T05:27:47.844Z"), new Date("2022-09-08T05:27:47.844Z"))
+    // Ni idServicio ni idCategoría -> No se añade ninguna condición
+    // Solo idCategoría -> No se añade condición de idServicio y se filtran los serviciosPrestados que contengan la categoría con el id dado
+    // Solo idServicio -> Se le da el manejo actual
+    // Tanto idServicio como idCategoria (validar si el servicio pertenece a esa categoría) -> Igual manejo al de arriba
+    const { idServicio, idCategoria, fechaInicio = "2000-01-01T00:00:00.847Z", fechaFin = "2100-01-01T00:00:00.847Z" } = getServiciosPrestadosFiltrosDto;
+
+    let findArgs = {
+      where: {
+        fechaActual: Between(new Date(fechaInicio), new Date(fechaFin)),
+        servicio: {}
       },
-      relations: ["servicios", "servicios.categoria"]
+      relations: ["servicio", "servicio.categoria"]
     };
-    const serviciosPrestados = await this.servicioPrestadoRepository.find(findArgs);
 
+    if (idServicio || (idServicio && idCategoria)) {
+      findArgs.where.servicio = {
+        id: idServicio
+      }
+    }
 
-    console.log(serviciosPrestados);
+    let serviciosPrestados = await this.servicioPrestadoRepository.find(findArgs);
+
+    if (idCategoria && !idServicio) {
+      const serviciosPrestadosDeCategoria = serviciosPrestados.filter(servicioPrestado => servicioPrestado.servicio.categoria.id === idCategoria);
+      serviciosPrestados = serviciosPrestadosDeCategoria;
+    }
+
+    let totalVentas = serviciosPrestados.reduce( (acc, item)  => {
+      return acc = acc + item.total;
+    }, 0);
+
+    return { serviciosPrestados, totalVentas };
     
-    
-    return { serviciosPrestados };
   }
 }

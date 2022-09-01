@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Servicio } from './entities/servicio.entity';
 
 @Injectable()
 export class ServiciosService {
 
-  findAll() {
-    return `This action returns all servicios`;
+  constructor(
+
+    @InjectRepository(Servicio)
+    private readonly servicioRepository: Repository<Servicio>,
+
+  ) { }
+
+  async findAll() {
+    return await this.servicioRepository.find({});
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} servicio`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} servicio`;
-  }
 }

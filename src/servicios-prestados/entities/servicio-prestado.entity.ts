@@ -1,5 +1,5 @@
 import { Servicio } from 'src/servicios/entities/servicio.entity';
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'servicios_prestados' })
 export class ServicioPrestado {
@@ -7,12 +7,11 @@ export class ServicioPrestado {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @ManyToMany(
-        () => Servicio, 
-        ( servicio ) => servicio.serviciosPrestados
+    @ManyToOne(
+        () => Servicio,
+        (servicio) => servicio.serviciosPrestados
     )
-    @JoinTable() // Solo debe estar en una entidad
-    servicios: Servicio[]
+    servicio: Servicio
 
 
     @Column('text')

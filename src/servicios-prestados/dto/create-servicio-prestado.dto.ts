@@ -6,9 +6,9 @@ import {
 
 export class CreateServicioPrestadoDto {
 
-    @IsString({ each: true })
-    @IsArray()
-    servicios: string[];
+    @IsString()
+    @MinLength(1)
+    servicio: string;
 
     @IsString()
     @MinLength(1)
