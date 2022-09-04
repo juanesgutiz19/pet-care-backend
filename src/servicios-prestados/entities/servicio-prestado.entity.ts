@@ -99,6 +99,12 @@ export class ServicioPrestado {
     })
     fechaActual: Date;
 
+    @Column({
+        type: 'date',
+        nullable: true
+    })
+    fecha: Date;
+
     @ManyToOne(
         () => Usuario,
         ( usuario ) => usuario.serviciosPrestados,
