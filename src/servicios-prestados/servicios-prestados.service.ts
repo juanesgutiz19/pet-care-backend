@@ -19,14 +19,15 @@ export class ServiciosPrestadosService {
 
   ) { }
 
-  async create(createServicioPrestadoDto: CreateServicioPrestadoDto) {
+  async create(createServicioPrestadoDto: CreateServicioPrestadoDto, usuario) {
 
     const { servicio: idServicio, ...detallesServicioPrestado } = createServicioPrestadoDto;
     const servicio = await this.servicioRepository.findOneBy({ id: idServicio });
 
     const servicioPrestado = this.servicioPrestadoRepository.create({
       ...detallesServicioPrestado,
-      servicio
+      servicio,
+      profesional: usuario
     });
 
     await this.servicioPrestadoRepository.save(servicioPrestado);

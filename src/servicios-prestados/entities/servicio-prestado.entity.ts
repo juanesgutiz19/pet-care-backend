@@ -1,5 +1,6 @@
 import { Servicio } from 'src/servicios/entities/servicio.entity';
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Usuario } from 'src/auth/entities/usuario.entity';
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'servicios_prestados' })
 export class ServicioPrestado {
@@ -12,7 +13,6 @@ export class ServicioPrestado {
         (servicio) => servicio.serviciosPrestados
     )
     servicio: Servicio
-
 
     @Column('text')
     nombrePaciente: string;
@@ -99,6 +99,11 @@ export class ServicioPrestado {
     })
     fechaActual: Date;
 
-    // TODO: profesional
+    @ManyToOne(
+        () => Usuario,
+        ( usuario ) => usuario.serviciosPrestados,
+        { eager: true }
+    )
+    profesional: Usuario
 
 }
